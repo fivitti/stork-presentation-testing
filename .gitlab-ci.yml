@@ -4,7 +4,6 @@ pages:
   stage: deploy
   script:
     - pip install .
-    - ls mdslides/reveal.js
     - mdslides example/simple.md
     - mdslides example/presentation.md --include example/media
     - mv presentation public
