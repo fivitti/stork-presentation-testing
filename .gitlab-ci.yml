@@ -15,3 +15,4 @@ pages:
     - master
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_PATHS: mdslides/reveal.js mdslides/cdn-release
