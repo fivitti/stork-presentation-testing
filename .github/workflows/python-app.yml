@@ -34,13 +34,13 @@ jobs:
     - name: Generate HTML
       run: |
         mdslides example/simple.md
-        mdslides example/presentation.md --include example/mediastics
-    - name: Test with pytest
+        mdslides example/presentation.md --include example/media
+    - name: Deploy pages
       if: success()
       uses: crazy-max/ghaction-github-pages@v3
       with:
         target_branch: gh-pages
-        build_dir: public
+        build_dir: presentation
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
