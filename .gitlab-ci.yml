@@ -1,11 +1,16 @@
-image: alpine:latest
+image: "python:3.8"
 
 pages:
   stage: deploy
   script:
-  - echo 'Nothing to do...'
+    - pip install .
+    - mdslides example/simple.md
+    - mdslides example/presentation.md --include example/media
+    - mv presentation public
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - master
+    - master
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
