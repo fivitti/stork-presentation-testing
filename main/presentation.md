@@ -210,7 +210,7 @@ agent-kea-tls-optional-client-cert-no-verify:
 
 From official Storybook website:
 
-<video nocontrols autoplay muted width="560" height="315">
+<video nocontrols autoplay muted loop width="560" height="315">
   <source src="media/storybook-hero-video-optimized-lg.mp4" type="video/mp4">
 </video>
 
