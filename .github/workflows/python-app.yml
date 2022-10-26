@@ -31,8 +31,7 @@ jobs:
         pip install .
     - name: Generate HTML
       run: |
-        mdslides example/simple.md
-        mdslides example/presentation.md --include example/media
+        mdslides main/presentation.md --include main/media
     - name: Deploy pages
       if: success()
       uses: crazy-max/ghaction-github-pages@v3
