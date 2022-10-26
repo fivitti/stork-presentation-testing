@@ -228,3 +228,5 @@ tags
 
 # Ignore example presentation
 example/presentation
+presentation/
+simple/
