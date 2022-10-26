@@ -126,6 +126,28 @@ Vulnerability checkers
 
 [comment]: # (!!!)
 
+### Directory structure
+
+``` [1|2,11,13|2|3-7|8-10|11-12|13|14-15]
+tests/system
+├── config
+│   ├── bind
+│   ├── kea
+│   ├── kea-basic-auth
+│   ├── kea-premium-host-database
+│   ├── kea-tls
+│   ├── certs
+│   │   └── CA
+│   └── supervisor
+├── core
+│   └── wrappers
+└── tests
+    └── core
+        └── data
+```
+
+[comment]: # (!!!)
+
 ### Example 1
 
 ```python [1-2|3|4-6|8|10-12]
