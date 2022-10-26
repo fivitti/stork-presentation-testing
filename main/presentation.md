@@ -126,10 +126,9 @@ Vulnerability checkers
 
 [comment]: # (!!!)
 
-### Example (code)
+### Example 1
 
-```python [2-3|1|4|5-7|9|11-13]
-@kea_parametrize("agent-kea")
+```python [1-2|3|4-6|8|10-12]
 def test_search_leases(kea_service: Kea,
                        server_service: Server):
     """Search by IPv4 address."""
@@ -146,21 +145,159 @@ def test_search_leases(kea_service: Kea,
 
 [comment]: # (!!!)
 
-### Example (configuration)
+### Example 2 (configuration)
 
-```yaml [1|2|3-6|7-9|10-11]
+```python [1-2|3-4|8|10-11]
+@kea_parametrize(
+  "agent-kea-tls-optional-client-cert-no-verify")
+def test_kea_over_secure_protocol(
+  server_service: Server, kea_service: Kea):
+    """Check if Stork agent sends requests to Kea over HTTPS."""
+    server_service.log_in_as_admin()
+    server_service.authorize_all_machines()
+    state, *_ = server_service.wait_for_next_machine_states()
+
+    access_point = state['apps'][0]['access_points'][0]
+    assert access_point['use_secure_protocol']
+    leases = server_service.list_leases('192.0.2.1')
+    assert leases['total'] == 1
+```
+
+[comment]: # (|||)
+
+### Example 2 (configuration)
+
+docker-compose.yaml:
+
+```yaml [1|2|3-5]
 agent-kea-tls-optional-client-cert-no-verify:
   extends: agent-kea
   volumes:
-    - type: volume
-      source: $PWD/tests/system/config/kea-tls/optional-client-cert.json
-      target: /etc/kea/kea-ctrl-agent-tls.json
+    - $PWD/tests/system/config/kea-tls/optional-client-↵
+      cert.json:/etc/kea/kea-ctrl-agent-tls.json
     - $PWD/tests/system/config/certs/cert.pem:/root/certs/cert.pem
     - $PWD/tests/system/config/certs/key.pem:/root/certs/key.pem
     - $PWD/tests/system/config/certs/CA:/root/certs/CA
   environment:
     STORK_AGENT_SKIP_TLS_CERT_VERIFICATION: "true"
+```
 
+[comment]: # (|||)
+
+kea-ctrl-agent.json:
+
+```
+<?include "/etc/kea/kea-ctrl-agent-tls.json"?>
+```
+
+optional-client-cert.json:
+
+```json
+"trust-anchor": "/root/certs/CA",
+"cert-file": "/root/certs/cert.pem",
+"key-file": "/root/certs/key.pem",
+"cert-required": false,
+```
+
+[comment]: # (|||))
+
+docker-compose.yaml:
+
+```yaml [6-8|9-10]
+agent-kea-tls-optional-client-cert-no-verify:
+  extends: agent-kea
+  volumes:
+    - $PWD/tests/system/config/kea-tls/optional-client-↵
+      cert.json:/etc/kea/kea-ctrl-agent-tls.json
+    - $PWD/tests/system/config/certs/cert.pem:/root/certs/cert.pem
+    - $PWD/tests/system/config/certs/key.pem:/root/certs/key.pem
+    - $PWD/tests/system/config/certs/CA:/root/certs/CA
+  environment:
+    STORK_AGENT_SKIP_TLS_CERT_VERIFICATION: "true"
+```
+
+[comment]: # (!!!)
+
+### Example 3 (BIND9)
+
+```python [1|4-7|9-10|12]
+def test_bind9(server_service: Server, bind9_service: Bind9):
+    server_service.log_in_as_admin()
+    server_service.authorize_all_machines()
+    state, *_ = server_service.
+      wait_for_next_machine_states()
+
+    assert state['apps'][0]['type'] == "bind9"
+
+    metrics = { metric.name: metric for metric
+        in bind9_service.read_prometheus_metrics() }
+
+    assert metrics["bind_up"].samples[0].value == 1.0
+```
+
+[comment]: # (!!!)
+
+### Example 4 (generate traffic)
+
+```python [1-2|7-9|11|12|13-14]
+def test_get_kea_stats(server_service: Server,
+      kea_service: Kea, perfdhcp_service: Perfdhcp):
+    server_service.log_in_as_admin()
+    server_service.authorize_all_machines()
+    server_service.wait_for_next_machine_states()
+
+    perfdhcp_service.generate_ipv4_traffic(
+        ip_address=kea_service.get_internal_ip_address(
+          "subnet_00", family=4))
+
+    server_service.wait_for_kea_statistics_pulling()
+    data = server_service.overview()
+
+    assert int(data['dhcp4_stats']['assignedAddresses']) > 9
+```
+
+[comment]: # (|||)
+
+### Example 4 (network configuration)
+
+docker-compose.yaml:
+
+```yaml [1|3|4|5|6|7-9|13-15]
+agent-kea:
+  ...
+  networks:
+    storknet:
+      ipv4_address: 172.20.42.100
+      priority: 1000
+    subnet_00:
+      ipv4_address: 172.100.42.100
+      priority: 500
+    subnet_01:
+      ipv4_address: 172.101.42.100
+      priority: 400
+    subnet6_00:
+      ipv6_address: 3000:db8:1:42::100
+      priority: 500
+```
+
+[comment]: # (!!!)
+
+### Example 5: (CloudSmith package)
+
+```python [2|1|3|3-8|9-10|11-12|13]
+@package_parametrize(version="1.0.0")
+def test_cloudsmith(package_service: ExternalPackages):
+    with package_service.no_validate() as legacy_service:
+        legacy_service.log_in_as_admin()
+        m = legacy_service.authorize_all_machines()["items"][0]
+        state = legacy_service.read_machine_state(m["id"])
+        old_version = state["agent_version"]
+        assert old_version == "1.0.0"
+    package_service.update_agent_to_latest_version()
+    package_service.update_server_to_latest_version()
+    state = package_service.wait_for_next_machine_states(
+      wait_for_apps=False)[0]
+    assert state["agent_version"] != old_version
 ```
 
 [comment]: # (!!!)
