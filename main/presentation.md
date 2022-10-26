@@ -8,6 +8,8 @@ Sławek Figiel | ISC | November 3, 2022
 
 # Stork testing
 
+![Stork logo](media/stork-logo.png) <!-- .element: style="height:10vh; max-width:80vw; image-rendering: crisp-edges;" -->
+
 [comment]: # (!!!)
 
 ## Agenda
@@ -35,7 +37,7 @@ Sławek Figiel | ISC | November 3, 2022
 
 [comment]: # (!!!)
 
-### Unit test example
+### Example
 
 ```go [1|2|3-5|7-8|10-12]
 // Collector construction fails if interval is missing.
@@ -65,7 +67,7 @@ func TestCollectorWithMissingInterval(t *testing.T) {
 
 [comment]: # (!!!)
 
-### Unit test example
+### Example
 
 ```ts [1|3|4-7|9|10|12-13]
 // ... some configurations above ...
@@ -124,6 +126,109 @@ Vulnerability checkers
 
 [comment]: # (!!!)
 
-### System test - example
+### Example (code)
+
+```python [2-3|1|4|5-7|9|11-13]
+@kea_parametrize("agent-kea")
+def test_search_leases(kea_service: Kea,
+                       server_service: Server):
+    """Search by IPv4 address."""
+    server_service.log_in_as_admin()
+    server_service.authorize_all_machines()
+    server_service.wait_for_next_machine_states()
+
+    data = server_service.list_leases('192.0.2.1')
+
+    assert data['total'] == 1
+    assert data['items'][0]['ipAddress'] == '192.0.2.1'
+    assert data['conflicts'] is None
+```
+
+[comment]: # (!!!)
+
+### Example (configuration)
+
+```yaml [1|2|3-6|7-9|10-11]
+agent-kea-tls-optional-client-cert-no-verify:
+  extends: agent-kea
+  volumes:
+    - type: volume
+      source: $PWD/tests/system/config/kea-tls/optional-client-cert.json
+      target: /etc/kea/kea-ctrl-agent-tls.json
+    - $PWD/tests/system/config/certs/cert.pem:/root/certs/cert.pem
+    - $PWD/tests/system/config/certs/key.pem:/root/certs/key.pem
+    - $PWD/tests/system/config/certs/CA:/root/certs/CA
+  environment:
+    STORK_AGENT_SKIP_TLS_CERT_VERIFICATION: "true"
+
+```
+
+[comment]: # (!!!)
+
+### Features
+
+- Supporting Stork Server/Stork Agent/Kea Control Agent/Kea DHCPv4 and v6 Daemons/BIND 9 Daemon/Databases
+- Managing services with Python API
+- Isolating test cases
+- Storing configurations in plain text
+- Generating traffic using Perfdhcp
+- Collecting log files on failure
+
+[comment]: # (!!!)
+
+### Missing parts
+
+- Only one instance of a specific service may be used in a single test case (HA pair testing)
+- Waiting for loading Kea configuration by DHCP Daemon (Kea DHCPv6 Daemon is unstable)
+- PyTest output in post-test log files (sic!)
+- OpenAPI validates the API contract too strictly
+- Some API endpoints in the Server wrapper
+- Running system test on different operating systems
+- Generating DNS traffic for BIND9
+- Diagnostic data for some failure types
+- Support for modern `docker compose` command
+
+[comment]: # (!!!)
+
+## Storybook
+
+- Written in TypeScript
+- Require Chrome
+- Tool to run the UI components in isolation
+- Files with the `.stories.ts` suffix
+- Executed by `rake storybook`
+  
+- Exploratory testing
+- Visual/regression testing 
+- Interaction testing
+- Accessibility testing
+- Snapshot testing
+
+[comment]: # (!!!)
+
+### Example
+
+From official Storybook website:
+
+<video nocontrols autoplay muted width="560" height="315">
+  <source src="media/storybook-hero-video-optimized-lg.mp4" type="video/mp4">
+</video>
+
+[comment]: # (!!!)
+
+## Next steps
+
+- Extend the system tests API
+- E2E UI tests
+- Performance / load testing
+  - Large WWW traffic
+  - Large number of Kea/BIND9 daemons
+  - Large Kea configurations
+- Fuzzing testing (REST API edge cases)
+- Improve performance of system tests
+
+[comment]: # (!!!)
+
+# Q&A
 
 [comment]: # (!!!)
