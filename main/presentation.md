@@ -349,6 +349,16 @@ def test_cloudsmith(package_service: ExternalPackages):
 
 [comment]: # (!!!)
 
+### Storybook
+
+From official Storybook website:
+
+<video nocontrols autoplay muted loop width="560" height="315">
+  <source src="media/storybook-hero-video-optimized-lg.mp4" type="video/mp4">
+</video>
+
+[comment]: # (!!!)
+
 ## Storybook
 
 - Written in TypeScript
@@ -358,20 +368,7 @@ def test_cloudsmith(package_service: ExternalPackages):
 - Executed by `rake storybook`
   
 - Exploratory testing
-- Visual/regression testing 
-- Interaction testing
-- Accessibility testing
-- Snapshot testing
-
-[comment]: # (!!!)
-
-### Example
-
-From official Storybook website:
-
-<video nocontrols autoplay muted loop width="560" height="315">
-  <source src="media/storybook-hero-video-optimized-lg.mp4" type="video/mp4">
-</video>
+- Visual-regression/interaction/accessibility/snapshot testing
 
 [comment]: # (!!!)
 
@@ -385,6 +382,7 @@ From official Storybook website:
   - Large Kea configurations
 - Fuzzing testing (REST API edge cases)
 - Improve performance of system tests
+- Documentation testing
 
 [comment]: # (!!!)
 
