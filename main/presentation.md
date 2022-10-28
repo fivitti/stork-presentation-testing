@@ -378,6 +378,19 @@ $ rake systemtest KEA_VERSION=2.2 BIND9_VERSION=9.16
 E   assert not True
 ```
 
+[comment]: # (|||)
+
+### Example 8 (low level access)
+
+- Python `pdb` debugger - iterative test execution
+- `rake systemtest:logs`
+- `rake systemtest:logs SERVICE=...`
+- `rake systemtest:shell SERVICE=...`
+- `rake systemtest:down`
+- `rake systemtest:perfdhcp`
+- `rake systemtest:sh[ps]`
+- Attaching Go `dlv` debugger to app inside container
+
 [comment]: # (!!!)
 
 ### Features
