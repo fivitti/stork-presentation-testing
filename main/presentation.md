@@ -167,7 +167,7 @@ def test_search_leases(kea_service: Kea,
 
 [comment]: # (!!!)
 
-### Example 2 (configuration)
+### Example 2 (Kea configuration)
 
 ```python [1-2|3-4|8|10-11]
 @kea_parametrize(
@@ -187,7 +187,7 @@ def test_kea_over_secure_protocol(
 
 [comment]: # (|||)
 
-### Example 2 (configuration)
+### Example 2 (Kea configuration)
 
 docker-compose.yaml:
 
@@ -208,8 +208,16 @@ agent-kea-tls-optional-client-cert-no-verify:
 
 kea-ctrl-agent.json:
 
-```
-<?include "/etc/kea/kea-ctrl-agent-tls.json"?>
+```json [5]
+{
+"Control-agent": {
+    "http-host": "0.0.0.0",
+    "http-port": 8000,
+    <?include "/etc/kea/kea-ctrl-agent-tls.json"?>
+    "control-sockets": { ... },
+    "loggers": [ ... ]
+}
+}
 ```
 
 optional-client-cert.json:
@@ -240,7 +248,24 @@ agent-kea-tls-optional-client-cert-no-verify:
 
 [comment]: # (!!!)
 
-### Example 3 (BIND9)
+### Example 3 (Services management)
+
+```yaml [3|5|6-9]
+agent-kea:
+  ...
+  volumes:
+      ...
+      - $PWD/docker/config/supervisor/supervisord.conf:/etc/supervisor/supervisord.conf
+      - $PWD/docker/config/supervisor/kea-agent.conf:/etc/supervisor/conf.d/kea-agent.conf
+      - $PWD/docker/config/supervisor/kea-dhcp4.conf:/etc/supervisor/conf.d/kea-dhcp4.conf
+      - $PWD/docker/config/supervisor/kea-dhcp6.conf:/etc/supervisor/conf.d/kea-dhcp6.conf
+      - $PWD/docker/config/supervisor/stork-agent.conf:/etc/supervisor/conf.d/stork-agent.conf
+```
+
+[comment]: # (!!!)
+
+
+### Example 4 (BIND9)
 
 ```python [1|4-7|9-10|12]
 def test_bind9(server_service: Server, bind9_service: Bind9):
@@ -259,7 +284,7 @@ def test_bind9(server_service: Server, bind9_service: Bind9):
 
 [comment]: # (!!!)
 
-### Example 4 (generate traffic)
+### Example 5 (generate traffic)
 
 ```python [1-2|7-9|11|12|13-14]
 def test_get_kea_stats(server_service: Server,
@@ -280,7 +305,7 @@ def test_get_kea_stats(server_service: Server,
 
 [comment]: # (|||)
 
-### Example 4 (network configuration)
+### Example 5 (network configuration)
 
 docker-compose.yaml:
 
@@ -304,7 +329,7 @@ agent-kea:
 
 [comment]: # (!!!)
 
-### Example 5: (CloudSmith package)
+### Example 6 (CloudSmith package)
 
 ```python [2|1|3|3-8|9-10|11-12|13]
 @package_parametrize(version="1.0.0")
@@ -324,6 +349,19 @@ def test_cloudsmith(package_service: ExternalPackages):
 
 [comment]: # (!!!)
 
+### Example 7 (Specify version)
+
+For all test cases (on-demand):
+
+```s
+$ rake systemtest KEA_VERSION=2.2 BIND9_VERSION=9.16
+```
+
+- Kea is installed from the CloudSmith packages.
+- BIND9 is installed from the DockerHub images.
+
+[comment]: # (!!!)
+
 ### Features
 
 - Supporting Stork Server/Stork Agent/Kea Control Agent/Kea DHCPv4 and v6 Daemons/BIND 9 Daemon/Databases
@@ -335,17 +373,45 @@ def test_cloudsmith(package_service: ExternalPackages):
 
 [comment]: # (!!!)
 
-### Missing parts
+### Missing & to improve parts
 
-- Only one instance of a specific service may be used in a single test case (HA pair testing)
-- Waiting for loading Kea configuration by DHCP Daemon (Kea DHCPv6 Daemon is unstable)
-- PyTest output in post-test log files (sic!)
-- OpenAPI validates the API contract too strictly
-- Some API endpoints in the Server wrapper
-- Running system test on different operating systems
-- Generating DNS traffic for BIND9
-- Diagnostic data for some failure types
-- Support for modern `docker compose` command
+- Only one instance of a specific service may be used in a single test case 
+  - Static IPs and hostnames block the built-in Docker scaling 
+- Missing HA pair testing
+
+[comment]: # (|||)
+
+- Missing waiting for loading Kea configuration by DHCP Daemon
+  - DHCPv6 daemon fails to open socket at first try
+  - Sockets are opening after finishing loading configuration
+  - Large configurations are loaded slowly (few seconds)
+  - Detecting when all sockets are opened (added in kea#2434 - Kea 2.2.0)
+  - Detecting when HTTP listener is running
+
+[comment]: # (|||)
+
+- Missing PyTest output in post-test log files (sic!)
+- Improve diagnostic data for some failure types
+
+[comment]: # (|||)
+
+- Improve OpenAPI contract validation
+  - More strict than components used in backend and frontend
+  - Poorly configurable
+  - No type hinting
+  - Some bugs
+- Missing some API endpoints in the Server wrapper
+
+[comment]: # (|||)
+
+- Missing running system test on different operating systems
+  - Only Debian Buster
+  - Requires new base Dockerfiles
+
+[comment]: # (|||)
+
+- Missing generating DNS traffic for BIND9
+- Missing support for modern `docker compose` command
 
 [comment]: # (!!!)
 
