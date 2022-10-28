@@ -121,7 +121,7 @@ Vulnerability checkers
 - Written in Python
 - Require Docker
 - Real interactions between Stork and Kea/BIND9
-- Files in the `tests/system` directory
+- Files in the `tests/system` directory with the `test_` prefix
 - Executed by `rake systemtest`
 
 [comment]: # (!!!)
@@ -359,6 +359,24 @@ $ rake systemtest KEA_VERSION=2.2 BIND9_VERSION=9.16
 
 - Kea is installed from the CloudSmith packages.
 - BIND9 is installed from the DockerHub images.
+
+[comment]: # (!!!)
+
+### Example 8 (troubleshooting)
+
+- PyTest output (stdout, stderr)
+- Log directory: `tests/system/test-results`
+- Stdout and stderr from Docker containers (Kea, Stork, BIND9, DB)
+- Docker status (`docker ps`)
+- Docker container details (`docker inspect`)
+
+```sh
+    # Check if Stork Agent handles all metrics
+    # returned by Kea.
+>   assert not kea_service.
+        has_encountered_unsupported_statistic()
+E   assert not True
+```
 
 [comment]: # (!!!)
 
